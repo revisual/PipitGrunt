@@ -109,7 +109,9 @@ module.exports = function ( grunt ) {
    grunt.loadNpmTasks( 'grunt-contrib-copy' );
    grunt.loadNpmTasks( 'grunt-image-resize' );
    grunt.loadNpmTasks( "grunt-aws" );
+
    grunt.registerTask( 'resize', 'resizes project images', require( './tasks/resize-images' )( grunt ) );
+   grunt.registerTask( 'createjson', 'creates project json', require( './tasks/create-project-json' )( grunt ) );
 
    /*grunt.registerTask( 'full-run', ['resize-and-create-json', 's3', 'clean:incoming', 'clean:all'] );
    grunt.registerTask( 'resize-and-create-json', ['image_resize', 'createjson'] );

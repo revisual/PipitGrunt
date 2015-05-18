@@ -64,6 +64,10 @@ module.exports = function ( grunt ) {
 
             done();
 
+         } )
+         .catch( function ( error ) {
+            grunt.log.error( error );
+            done( false );
          } );
 
 

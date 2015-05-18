@@ -4,42 +4,73 @@
 module.exports = function ( grunt ) {
 
    var fs = require( "./file-access-extended" )( grunt );
+   var Promise = require( 'promise' );
 
    return function () {
       var done = this.async();
+      var name = this.name;
 
-      grunt.config.requires( this.name + '.sizes' );
-      grunt.config.requires( this.name + '.imagesOut' );
-      grunt.config.requires( this.name + '.jasonPath' );
-      grunt.config.requires( this.name + '.project' );
+
+      grunt.config.requires( name + '.sizes' );
+      grunt.config.requires( name + '.imagesOut' );
+      grunt.config.requires( name + '.jasonPath' );
+      grunt.config.requires( name + '.project' );
 
       // var projectJSONPath = grunt.config( this.name + '.jasonPath' ) + grunt.config( this.name + '.project' ) + '.json';
-      var jsonID = grunt.config( this.name + '.project' );
-      var jsonPath = grunt.config( this.name + '.jasonPath' );
-      var bookID = grunt.config( this.name + '.book' );
-      var bookDesc = grunt.config( this.name + '.bookDesc' );
-      var imagesOut = grunt.config( this.name + '.imagesOut' );
-      var sizes = grunt.config( this.name + '.sizes' );
+      var jsonID = grunt.config( name + '.project' );
+      var jsonPath = grunt.config( name + '.jasonPath' );
 
-      fs.createImageMetrics( sizes, imagesOut )
-         .then( function ( metrics ) {
+      var imagesOut = grunt.config( name + '.imagesOut' );
+      var sizes = grunt.config( name + '.sizes' );
 
-            return fs.getProject( jsonID, jsonPath )
-               .then( function ( json ) {
-                  var book = fs.getBook( bookID, json );
-                  book.title = bookDesc;
-                  book.sizes = metrics.sizes;
-                  book.range = metrics.range;
-                  return fs.writeJSON( jsonPath + jsonID + ".json", json );
+      var project;
+      var books;
+
+      var writeMetricsIntoProject = function ( book ) {
+         return fs.createImageMetrics( sizes, imagesOut + book + "/" )
+            .then( function ( metrics ) {
+               var bookData = fs.getBook( book, project );
+               bookData.title = book.replace( /-/g, " " );
+               bookData.sizes = metrics.sizes;
+               bookData.range = metrics.range;
+            } )
+      };
+
+      fs.getProject( jsonID, jsonPath )
+         .then( function ( json ) {
+            project = json;
+            project.title = grunt.config( name + '.projectDesc' );
+            return fs.readFolderListing(
+               imagesOut,
+               function ( name, ext, isFolder ) {
+                  return ( isFolder );
                } )
-               .then( function () {
-                  done();
-               } )
+         } )
+         .then( function ( data ) {
+            books = data.contents;
+            var promises = [];
+            var len = books.length;
+            var book;
+            for (var i = 0; i < len; i++) {
+               book = books[i];
+               promises.push( writeMetricsIntoProject( book ) );
+            }
+
+            return Promise.all( promises );
+         } )
+         .then( function () {
+            return fs.writeJSON( jsonPath + jsonID + ".json", project );
 
          } )
-         .catch( function ( error ) {
-            grunt.log.error( 'An error occured ' + JSON.stringify( error ) );
+         .then( function () {
 
+            done()
+         } )
+         .catch( function ( error ) {
+            grunt.log.error( error );
+            done( false );
          } );
+
+
    }
 }
