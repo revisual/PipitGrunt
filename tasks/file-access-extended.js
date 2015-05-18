@@ -121,6 +121,7 @@ module.exports = function ( grunt ) {
        readJSONFromFolder: fs.readJSONFromFolder,
        readFolderListing: fs.readFolderListing,
        readFilesFromList: fs.readFilesFromList,*/
+      readFolderListing: fs.readFolderListing,
       getBook: getBook,
       writeJSON: fs.writeJSON,
       getProject: getProject,

@@ -67,47 +67,20 @@ module.exports = function ( grunt ) {
             }
          },
 
-         image_resize: {
-            xsmall: {
-               options: {
-                  width: SIZES.xsmall,
-                  quality: IMAGE_QUALITY
-               },
-               src: IMAGES_IN + '*.*',
-               dest: IMAGES_OUT + SIZES.xsmall + '/'
-            },
-            small: {
-               options: {
-                  width: SIZES.small,
-                  quality: IMAGE_QUALITY
-               },
-               src: IMAGES_IN + '*.*',
-               dest: IMAGES_OUT + SIZES.small + '/'
-            },
-            medium: {
-               options: {
-                  width: SIZES.medium,
-                  quality: IMAGE_QUALITY
-               },
-               src: IMAGES_IN + '*.*',
-               dest: IMAGES_OUT + SIZES.medium + '/'
-            },
-            large: {
-               options: {
-                  width: SIZES.large,
-                  quality: IMAGE_QUALITY
-               },
-               src: IMAGES_IN + '*.*',
-               dest: IMAGES_OUT + SIZES.large + '/'
-            },
-            xlarge: {
-               options: {
-                  width: SIZES.xlarge,
-                  quality: IMAGE_QUALITY
-               },
-               src: IMAGES_IN + '*.*',
-               dest: IMAGES_OUT + SIZES.xlarge + '/'
-            }
+         resize: {
+            quality: IMAGE_QUALITY,
+            sizes: SIZES,
+            imageIn: IMAGES_IN,
+            imageOut: IMAGES_OUT
+         },
+
+         createjson: {
+            project: PROJECT,
+            projectDesc: PROJ_TITLE,
+            imagesOut: IMAGES_OUT,
+            sizes: SIZES,
+            jasonPath: JSON_PATH
+
          },
 
          aws: grunt.file.readJSON( "aws-credentials.json" ),
@@ -123,18 +96,11 @@ module.exports = function ( grunt ) {
                src: "**",
                dest: S3_PATH
             }
-         },
-
-         createjson: {
-            project: PROJECT,
-            book: BOOK,
-            uid: S3_PATH,
-            bookDesc: BOOK_TITLE,
-            projectDesc: PROJ_TITLE,
-            imagesOut: IMAGES_OUT,
-            sizes: SIZES,
-            jasonPath: JSON_PATH
          }
+
+
+
+
 
       }
    );
@@ -143,12 +109,13 @@ module.exports = function ( grunt ) {
    grunt.loadNpmTasks( 'grunt-contrib-copy' );
    grunt.loadNpmTasks( 'grunt-image-resize' );
    grunt.loadNpmTasks( "grunt-aws" );
+   grunt.registerTask( 'resize', 'resizes project images', require( './tasks/resize-images' )( grunt ) );
 
-   grunt.registerTask( 'full-run', ['resize-and-create-json', 's3', 'clean:incoming', 'clean:all'] );
+   /*grunt.registerTask( 'full-run', ['resize-and-create-json', 's3', 'clean:incoming', 'clean:all'] );
    grunt.registerTask( 'resize-and-create-json', ['image_resize', 'createjson'] );
    grunt.registerTask( '480-temp', ['image_resize', 'createjson', 'clean:incoming', 'clean:all'] );
    grunt.registerTask( 'upload', ['s3'] );
-   grunt.registerTask( 'createjson', 'creates the json for each project', require( './scripts/create-project-json' )( grunt ) );
+   grunt.registerTask( 'createjson', 'creates the json for each project', require( './tasks/create-project-json' )( grunt ) );*/
 
 }
 ;
