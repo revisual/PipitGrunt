@@ -43,7 +43,7 @@ module.exports = function ( grunt ) {
             return fs.readFolderListing(
                imagesOut,
                function ( name, ext, isFolder ) {
-                  return ( isFolder );
+                  return ( isFolder && name != "thumbs" );
                } )
          } )
          .then( function ( data ) {

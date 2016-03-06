@@ -108,7 +108,8 @@ module.exports = function () {
          } );
    };
 
-   var getAllStatsIn = function ( folder, extensions ) {
+   var
+      getAllStatsIn = function ( folder, extensions ) {
       var out = [];
       return getFolderListing(
          folder,
@@ -117,6 +118,12 @@ module.exports = function () {
          } )
          .then( function ( data ) {
             var promises = [];
+
+
+
+
+
+
             var len = data.contents.length;
             for (var i = 0; i < len; i++) {
                promises.push(

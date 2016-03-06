@@ -1,15 +1,14 @@
 module.exports = function ( grunt ) {
 
-   var PROJECT = "rnd-walks";
-   var PROJ_TITLE = "R&D Walks";
-   var BOOK = "fluttering-wire";
-   var BOOK_TITLE = "fluttering wire";
+   var PROJECT = "making-ground";
+   var PROJ_TITLE = "Making Ground";
 
-   var S3_PATH = PROJECT + "/" + BOOK + "/";
+   var S3_PATH = PROJECT + "/";
 
    var IMAGE_QUALITY = 0.5;
    var SIZES = {xsmall: 480, small: 768, medium: 992, large: 1200, xlarge: 1620};
    var IMAGES_IN = 'images/in/';
+   var IMAGES_WORKING = 'images/working/';
    var IMAGES_OUT = 'images/out/';
    var JSON_PATH = 'json/';
 
@@ -18,60 +17,19 @@ module.exports = function ( grunt ) {
       {
          clean: {
             all: [IMAGES_OUT + SIZES.xsmall, IMAGES_OUT + SIZES.small, IMAGES_OUT + SIZES.medium, IMAGES_OUT + SIZES.large, IMAGES_OUT + SIZES.xlarge],
-            incoming: [IMAGES_IN + '*']
+            working: [IMAGES_WORKING + '*'],
+            incoming: [IMAGES_IN + '*'],
+            out: [IMAGES_OUT + '*']
          },
 
-         copy: {
-            xsmall: {
-               expand: true,
-               flatten: true,
-               cwd: IMAGES_IN,
-               src: '*',
-               dest: IMAGES_OUT + SIZES.xsmall,
-               filter: 'isFile'
-            },
-            small: {
-               expand: true,
-               flatten: true,
-               cwd: IMAGES_IN,
-               src: '*',
-               dest: IMAGES_OUT + SIZES.small,
-               filter: 'isFile'
-            },
-            medium: {
-               expand: true,
-               flatten: true,
-               cwd: IMAGES_IN,
-               src: '*',
-               dest: IMAGES_OUT + SIZES.medium,
-               filter: 'isFile'
-            }
-            ,
-            large: {
-               expand: true,
-               flatten: true,
-               cwd: IMAGES_IN,
-               src: '*',
-               dest: IMAGES_OUT + SIZES.large
-               ,
-               xlarge: {
-                  expand: true,
-                  flatten: true,
-                  cwd: IMAGES_IN,
-                  src: '*',
-                  dest: IMAGES_OUT + SIZES.xlarge,
-                  filter: 'isFile'
-               }
-
-
-            }
-         },
 
          resize: {
+            dryRun: false,
             quality: IMAGE_QUALITY,
             sizes: SIZES,
-            imageIn: IMAGES_IN,
-            imageOut: IMAGES_OUT
+            imageIn: IMAGES_WORKING,
+            imageOut: IMAGES_OUT,
+            thumbs: {width: 96, height: 64}
          },
 
          createjson: {
@@ -83,13 +41,40 @@ module.exports = function ( grunt ) {
 
          },
 
+         sendToDataBase: {
+            json:grunt.file.readJSON( JSON_PATH + PROJECT + ".json" ) ,
+            url: grunt.file.readJSON( "database_url.json" )
+         },
+
+
+         copy: {
+            verifylowercase: {
+               files: [{
+                  expand: true,
+                  cwd: IMAGES_IN,
+                  dest: IMAGES_WORKING,
+                  src: [
+                     '**/*.JPG',
+                     '**/*.jpg'
+                  ],
+                  rename: function(dest, src) {
+                     return dest + src.replace('.JPG','.jpg');
+                  }
+               }]
+            }
+         },
+
+
+
          aws: grunt.file.readJSON( "aws-credentials.json" ),
 
          s3: {
             options: {
                accessKeyId: "<%= aws.accessKeyId %>",
                secretAccessKey: "<%= aws.secretAccessKey %>",
-               bucket: "pipit"
+               bucket: "pipit",
+               region:"eu-west-1",
+               dryRun: false
             },
             build: {
                cwd: "images/out/",
@@ -97,27 +82,22 @@ module.exports = function ( grunt ) {
                dest: S3_PATH
             }
          }
-
-
-
-
-
       }
    );
+
 
    grunt.loadNpmTasks( 'grunt-contrib-clean' );
    grunt.loadNpmTasks( 'grunt-contrib-copy' );
    grunt.loadNpmTasks( 'grunt-image-resize' );
    grunt.loadNpmTasks( "grunt-aws" );
 
+   grunt.registerTask( 'test', ['copy:verifylowercase','resize'/*,'clean:working', 'createjson', 's3', 'sendToDataBase', 'clean:incoming', 'clean:all'*/] );
+   grunt.registerTask( 'deploy', ['resize', /*'createjson'*/, 's3'/*, 'clean:incoming', 'clean:all'*/] );
    grunt.registerTask( 'resize', 'resizes project images', require( './tasks/resize-images' )( grunt ) );
    grunt.registerTask( 'createjson', 'creates project json', require( './tasks/create-project-json' )( grunt ) );
-
-   /*grunt.registerTask( 'full-run', ['resize-and-create-json', 's3', 'clean:incoming', 'clean:all'] );
-   grunt.registerTask( 'resize-and-create-json', ['image_resize', 'createjson'] );
-   grunt.registerTask( '480-temp', ['image_resize', 'createjson', 'clean:incoming', 'clean:all'] );
+   grunt.registerTask( 'sendToDataBase', 'send to data base', require( './tasks/sent-to-database' )( grunt ) );
    grunt.registerTask( 'upload', ['s3'] );
-   grunt.registerTask( 'createjson', 'creates the json for each project', require( './tasks/create-project-json' )( grunt ) );*/
+
 
 }
-;
+
