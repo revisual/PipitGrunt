@@ -42,7 +42,7 @@ module.exports = function ( grunt ) {
          },
 
          sendToDataBase: {
-            json:grunt.file.readJSON( JSON_PATH + PROJECT + ".json" ) ,
+            json: grunt.file.readJSON( JSON_PATH + PROJECT + ".json" ),
             url: grunt.file.readJSON( "database_url.json" )
          },
 
@@ -57,13 +57,12 @@ module.exports = function ( grunt ) {
                      '**/*.JPG',
                      '**/*.jpg'
                   ],
-                  rename: function(dest, src) {
-                     return dest + src.replace('.JPG','.jpg');
+                  rename: function ( dest, src ) {
+                     return dest + src.replace( '.JPG', '.jpg' );
                   }
                }]
             }
          },
-
 
 
          aws: grunt.file.readJSON( "aws-credentials.json" ),
@@ -73,7 +72,7 @@ module.exports = function ( grunt ) {
                accessKeyId: "<%= aws.accessKeyId %>",
                secretAccessKey: "<%= aws.secretAccessKey %>",
                bucket: "pipit",
-               region:"eu-west-1",
+               region: "eu-west-1",
                dryRun: false
             },
             build: {
@@ -91,8 +90,7 @@ module.exports = function ( grunt ) {
    grunt.loadNpmTasks( 'grunt-image-resize' );
    grunt.loadNpmTasks( "grunt-aws" );
 
-   grunt.registerTask( 'test', ['copy:verifylowercase','resize'/*,'clean:working', 'createjson', 's3', 'sendToDataBase', 'clean:incoming', 'clean:all'*/] );
-   grunt.registerTask( 'deploy', ['resize', /*'createjson'*/, 's3'/*, 'clean:incoming', 'clean:all'*/] );
+   grunt.registerTask( 'deploy', ['clean:out','copy:verifylowercase', 'resize', 'clean:working', 'createjson', 'sendToDataBase', 's3'] );
    grunt.registerTask( 'resize', 'resizes project images', require( './tasks/resize-images' )( grunt ) );
    grunt.registerTask( 'createjson', 'creates project json', require( './tasks/create-project-json' )( grunt ) );
    grunt.registerTask( 'sendToDataBase', 'send to data base', require( './tasks/sent-to-database' )( grunt ) );
