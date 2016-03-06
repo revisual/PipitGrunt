@@ -30,6 +30,7 @@ images
 json
 
 aws-credentials.json
+database_url.json
 
 .idea
 *.iml
