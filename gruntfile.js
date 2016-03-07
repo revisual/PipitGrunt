@@ -90,7 +90,7 @@ module.exports = function ( grunt ) {
    grunt.loadNpmTasks( 'grunt-image-resize' );
    grunt.loadNpmTasks( "grunt-aws" );
 
-   grunt.registerTask( 'deploy', ['clean:out','copy:verifylowercase', 'resize', 'clean:working', 'createjson', 'sendToDataBase', 's3'] );
+   grunt.registerTask( 'fulldeploy', ['clean:out','copy:verifylowercase', 'resize', 'clean:working', 'createjson', 'sendToDataBase', 's3'] );
    grunt.registerTask( 'resize', 'resizes project images', require( './tasks/resize-images' )( grunt ) );
    grunt.registerTask( 'createjson', 'creates project json', require( './tasks/create-project-json' )( grunt ) );
    grunt.registerTask( 'sendToDataBase', 'send to data base', require( './tasks/sent-to-database' )( grunt ) );
